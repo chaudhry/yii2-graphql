@@ -8,8 +8,9 @@
 
 namespace yii\graphql\base;
 
+use yii\graphql\traits\ShouldValidate;
 
 class GraphQLQuery extends GraphQLField
 {
-
+    use ShouldValidate;
 }

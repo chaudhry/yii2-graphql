@@ -24,16 +24,19 @@ trait ShouldValidate
 
         return function () use ($resolver) {
             $arguments = func_get_args();
+            $args = ArrayHelper::getValue($arguments, 1, []);
+            
+            $data = [];
+            foreach (array_keys($this->args()) as $attribute) {
+                $data[$attribute] = isset($args[$attribute]) ? $args[$attribute] : null;
+            }
 
-            $rules = $this->rules();
-            if (sizeof($rules)) {
-                //索引1的为args参数.
-                $args = ArrayHelper::getValue($arguments, 1, []);
-                $val = DynamicModel::validateData($args, $rules);
-                if ($error = $val->getFirstErrors()) {
-                    $msg = 'input argument(' . key($error) . ') has validate error:' . reset($error);
-                    throw new InvalidParamException($msg);
-                }
+            $model = DynamicModel::validateData($data, $this->rules());
+
+            if ($model->hasErrors()) {
+                $error = $model->getFirstErrors();
+                $msg = 'input argument(' . key($error) . ') has validate error:' . reset($error);
+                throw new InvalidParamException($msg);
             }
 
             return $resolver(...$arguments);
